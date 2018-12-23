@@ -7,9 +7,15 @@ Is it true to say that Boston was more violent than New York and Seattle, but le
 
 Crimes such as sexual assaults and rapes have not been included because of a lack of data.   ## Executive Summary  Public safety is vital to public health and happiness, and a state's safety can be a crucial factor in deciding where to relocate your family.The map shows that Mattapan,Roxbury, and Dorchester have had more aggravated assaults than other neighborhoods. Roxbury, downtown, and Dorchester had more robberies than other sections of the city. Back Bay, the South End, and downtown suffered more larcenies. In 2017 the rate of violent crime in Massachusetts fell for the sixth year in a row and dropped below national levels for the second time since 2016, according to FBI statistics. 
 
-In 2017, there were 358 incidents of violent crime per 100,000 people in Massachusetts, compared to the national rate of 394 per 100,000 people, according to data published in late September.The FBI defines violent crime as homicide, rape, robbery, and aggravated assault. The bureau said it calculates crime rates using figures voluntarily provided by law enforcement agencies, and tallies estimates when it doesn’t receive a complete year’s worth of data. **The overall crime rate in Boston is equal to the national average. For every 100,000 people, there are 7.56 daily crimes that occur in Boston. Boston is safer than 14% of the cities in the United States.  In Boston you have a 1 in 37 chance of becoming a victim of any crime.  The number of total year over year crimes in Boston has decreased by 9%.** 
+In 2017, there were 358 incidents of violent crime per 100,000 people in Massachusetts, compared to the national rate of 394 per 100,000 people, according to data published in late September.The FBI defines violent crime as homicide, rape, robbery, and aggravated assault. The bureau said it calculates crime rates using figures voluntarily provided by law enforcement agencies, and tallies estimates when it doesn’t receive a complete year’s worth of data. 
+
+**The overall crime rate in Boston is equal to the national average. For every 100,000 people, there are 7.56 daily crimes that occur in Boston. Boston is safer than 14% of the cities in the United States.  In Boston you have a 1 in 37 chance of becoming a victim of any crime.  The number of total year over year crimes in Boston has decreased by 9%.** 
 
 > I  want to highlight what the City of Boston says about the data they provide:  “Although the City has made reasonable efforts to provide accurate data, the City makes no representations or guarantees about the accuracy, completeness, or currency of the information provided. The City of Boston provides this data as is and with all faults, and makes no warranty of any kind. Each user is responsible for determining the suitability of the data for their intended use or purpose.”
+
+**If you Would like to read like a blog Post then.Click on Link below. It will redirect you to another page.**
+
+https://rpubs.com/shah_np/453629
 
 ## Link for R shiny app is:
 
