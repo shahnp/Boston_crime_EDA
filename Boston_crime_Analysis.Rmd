@@ -1,0 +1,1318 @@
+---
+title: "Boston Crime Analysis"
+author: "Pankaj Shah"
+date: 12/22/2018
+output:
+  html_document:
+    number_sections: true
+    fig_caption: true
+    toc: true
+    fig_width: 7
+    fig_height: 4.5
+    theme: cosmo
+    highlight: tango
+    code_folding: hide
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo=TRUE, error=FALSE, tidy.opts = list(width.cutoff = 60))
+```
+
+# **Introduction**{.tabset .tabset-fade .tabset-pills}
+
+I started to analysed this project keeping one thing in my mind. I lived in Boston City for past 10 years but how safe is it compared to any other big cities around the United States?
+It’s no secret here that Boston is greater than most places on the planet (especially if you ask any Bostonian who is literally comparing it to New York). That’s not just their stance/attitude/ego talking; but in our analysis I  have some serious data just to prove it. According to most of the  recent polls and studies published as of today 12/21/2018, from tasty burger/water, shack shake to pedestrian safety(Vision Zero Boston) Boston seems to get better year after year. Vision Zero Boston is Cities commitment to focus the City’s resources on proven strategies to eliminate fatal and serious traffic crashes in the City by 2030, that rate Boston as tops in the nation.When I get a chance to look at Beantown’s incidence of rape (39 per 100,000, putting it third on the list of cities in the survey) and assault (483 per 100,000, fifth on the list of cities in the survey) [**external data Source**] it might seem like a surprisingly dangerous big city.Surprising then is that only 27% of those surveyed as of  end of 2018 said they considered Boston to fairly or very unsafe. According to recent surveys the city’s low murder rate per capita (9 per 100,000) could likely be a contributing factor to this perception.The city also has the second-lowest incidence of vehicle theft at a rate of 258 per 100,000 and fares well on the other crimes rates.
+
+
+Is it true to say that Boston was more violent than New York and Seattle, but less violent than Chicago and Las Vegas, according to numbers from the FBI, based on crimes committed back in 2015. As of Today 12/21/18 Nationally, Boston ranked 14 out of 50 according to Us News.After digging up and analysing the data what we found out that in recent numbers from the Boston Police Department, or BPD, show that violent crime, as well as property crime, has continued to drop, and has been steadily dropping for past years.
+
+My Goal was to build R shiny app to see the results without digging too much in data. Took a lot of help from Online Community to do EDA as well as to built the R Shiny App. Hope you guys enjoy reading these and if you like please Upvote.
+
+I have successfully built R shiny app which covers crime map based on murders, aggravated assaults, and robberies, as well as property crimes such as burglaries, auto thefts, larcenies, and arson for data of date between August 2015 till today. Crimes such as sexual assaults and rapes have not been included because of a lack of data.
+
+
+## Executive Summary
+
+Public safety is vital to public health and happiness, and a state's safety can be a crucial factor in deciding where to relocate your family.The map shows that Mattapan,Roxbury, and Dorchester have had more aggravated assaults than other neighborhoods. Roxbury, downtown, and Dorchester had more robberies than other sections of the city. Back Bay, the South End, and downtown suffered more larcenies. In 2017 the rate of violent crime in Massachusetts fell for the sixth year in a row and dropped below national levels for the second time since 2016, according to FBI statistics.
+
+In 2017, there were 358 incidents of violent crime per 100,000 people in Massachusetts, compared to the national rate of 394 per 100,000 people, according to data published in late September.The FBI defines violent crime as homicide, rape, robbery, and aggravated assault. The bureau said it calculates crime rates using figures voluntarily provided by law enforcement agencies, and tallies estimates when it doesn’t receive a complete year’s worth of data.
+
+> The overall crime rate in Boston is equal to the national average.
+> For every 100,000 people, there are 7.56 daily crimes that occur in Boston.
+> Boston is safer than 14% of the cities in the United States.
+> In Boston you have a 1 in 37 chance of becoming a victim of any crime.
+> The number of total year over year crimes in Boston has decreased by 9%.
+
+I  want to highlight what the City of Boston says about the data they provide:
+
+“Although the City has made reasonable efforts to provide accurate data, the City makes no representations or guarantees about the accuracy, completeness, or currency of the information provided. The City of Boston provides this data as is and with all faults, and makes no warranty of any kind. Each user is responsible for determining the suitability of the data for their intended use or purpose.”
+
+
+
+## Description
+
+The dataset 'Crime Incident Report' is an open data intiative program led by the Boston government to document the initial details surrounding an incident to which Boston Police Department (BPD) officers respond. The dataset contains records from the Boston government's new crime incident report system, which includes a reduced set of fields focused on capturing the type of incident as well as when and where it occured. The Boston government took an initiative to improve the city of Boston by releasing its data source to the public. Over the past few decades, the way we look at the field of climate, genetics, sports, have been altered dramatically due to big data technology advancements; similarly, the way crime data was traditionally held by law enforcement agencies has also changed, crime prediction is a niche trend in this era.
+
+The dataset begins from August 2015 to December 21st 2018 (1st day Of Winter), As of December 21st, 2018, there are 349080 incidents and 17 variables; ranging from types of offense, reported area and reporting area, date occured, street, and the longitude and latitude of the incident. The size of the dataset is 78.5mb.
+
+## Why crime data? 
+
+**Why we choose this dataset?**
+
+Performing an analysis of crime on the Boston dataset will help not only me but people living here to identify and analyze patterns in Boston's crime incidents. I believe that the results of this analysis can be useful to law enforcement agencies in how they deploy their resources, and to assist in identifying and apprehending suspects. Last but not least, it would help many international people residing in Boston, to better understand the city of Boston.
+
+## Analysis objective
+
+I plan to explore the incidents backwards through time, and mine for patterns by time and location and to visually represent these results. These results are not only potentially beneficial to the law enforcement, but they can also be beneficial for the residents of Boston to see and understand where and how often crime is happening in their neighborhood. I hope that by understanding the frequency of incidents in a neighborhood, residents can be proactive about how they report incidents.
+
+
+#**Data Preparation** {.tabset .tabset-fade .tabset-pills}
+
+## Library 
+
+These are the packages involved in reading this report.
+```{r message = FALSE}
+library("dplyr")
+library("tidyverse")
+library("chron")
+library("ggplot2")
+library("janitor")
+library("Hmisc")
+library("funModeling")
+library("tidyverse")
+library("openair")
+library("rticles")
+library("lubridate")
+library("tidyr")
+library("skimr")
+library("rmarkdown")
+library("visdat")
+library("maps")
+library("leaflet")
+library("plotly")
+library("waffle") 
+library("DataExplorer")
+library("lattice")
+library("wordcloud")
+library("gridExtra")
+```
+
+**Theme Settings**  
+```{r message = FALSE, include=FALSE}
+theme_pankaj <- theme(
+                    strip.background = element_blank(),
+                    panel.background = element_rect(size = 0.05, linetype = "solid"),
+                    plot.background = element_rect(fill = "white", color = "black", size = 5),
+                    plot.title = element_text(color="#D70026", size=14, face="bold.italic", hjust = 0.5, vjust=0.5),
+                    plot.subtitle = element_text(color="#993333", size=14, face="bold.italic", hjust = 0.5, vjust=0.5),
+                    plot.caption=element_text(size=9.5, hjust=1.0, vjust=1.05,margin=margin(t= 15)),
+                    plot.margin = unit(c(0.75, 0.75, 0.75, 0.75), "cm"),
+                    panel.border = element_blank(),
+                    panel.grid.major =   element_line("white"),
+                    panel.grid.minor =   element_line("white"),
+                    legend.key = element_blank(),
+                    legend.background = element_blank(),
+                    legend.position = "right",
+                    legend.text = element_text(size=9,color= "black", face = "bold"),
+                    legend.title=element_text(size=10,color="black", face= "bold.italic"), 
+                    axis.title.y = element_text(color = "#993333", size=14,hjust = 0.5, face = "bold.italic"),
+                    axis.title.x = element_text(color = "blue", size=14, hjust = 0.5, face = "bold.italic"),
+                    axis.text.y = element_text(color = "black", size = 12),
+                    axis.text.x = element_text(color = "black", size = 12),
+                    strip.text = element_text(size = 16, color = "red"),
+                    axis.line = element_line(color = "black", size = 0.5),
+                    axis.ticks = element_line(color = "black"))
+```
+
+## Importing Datasets
+
+Reads the csv file 'crime_incident_reports.csv' from the Government of Boston's website and save it as variable raw_crime. The code is written so the reader of the .Rmd file does not need the dataset downloaded to run the code chunks. The datasets is from August 2015 till today December 21st 2018.
+
+This report is based on crimes reported to, and arrests made by, the Boston
+Police Department within the City of Boston.
+```{r}
+raw_crime = read.csv('https://data.boston.gov/dataset/6220d948-eae2-4e4b-8723-2dc8e67722a3/resource/12cb3883-56f5-47de-afa5-3b1cf61b257b/download/crime_incident_reports.csv', sep = ",", na.strings =c('','NA','na','N/A','n/a','NaN','nan'), strip.white = TRUE, stringsAsFactors = FALSE)
+```
+
+## MA | Boston 
+
+**Overview of Massachusetts and Northeastern University** 
+
+The red outlined state is the state of Massachusetts, located in the Northeastern part of the United States. Boston is situated on the Eastern side of Massachusetts, touching the Atlantic ocean and sits at 42.3601° N, 71.0589° W.
+
+The second map map of Boston through Leaflet Package.
+
+The  Third Map is also Map of Boston distributed among Crime District by Latitude and Longitude.
+```{r}
+ggplot(map_data("state", region = "Massachusetts"), aes(long, lat, group = group)) +
+  geom_polygon(fill = "gray", colour = "red") +
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  coord_quickmap()
+
+leaflet() %>%
+  setView(lng=-71.0892, lat=42.3398, zoom = 10) %>% 
+  addTiles() %>%
+  addMarkers(lng=-71.0892, lat=42.3398, popup="Boston") 
+
+# Crime Mapping
+qplot(Long, Lat, data= raw_crime, color=DISTRICT, geom='point', xlim = c(-71.2,-70.95), ylim= c(42.22,42.4))+
+theme_bw(base_size=15)+
+  geom_point(size = 2)+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")
+```
+
+I used the latitude and longitude coordinates to plot each incident in the area. This roughly depicts the map of Boston.
+
+Lets name our datasets so that we don't have to download time and again when we modify our code.
+
+```{r}
+# Lets name crime datasets, if we mess up then we dont have to import another time.
+crime <- raw_crime
+```
+
+#**Statisticsl Analysis Exploration** {.tabset .tabset-fade .tabset-pills}
+
+**Info about the crime datasets:** 
+```{r , include= FALSE}
+# Writing function
+df_info <- function(x) {
+  data  <- as.character(substitute(x))  ##data frame name
+  size <- format(object.size(x), units="Mb")  ##size of data frame in Mb
+  
+  ##column information
+  column.info <- data.frame( column        = names(sapply(x, class)),
+                             #class         = sapply(x, class),
+                             unique.values = sapply(x, function(y) length(unique(y))),
+                             missing.count = colSums(is.na(x)),
+                             missing.pct   = round(colSums(is.na(x)) / nrow(x) * 100, 2))
+  
+  row.names(column.info) <- 1:nrow(column.info)
+  
+  list(data.frame     = data.frame(name=data, size=size),
+       dimensions     = data.frame(rows=nrow(x), columns=ncol(x)),
+       column.details = column.info)
+}
+Sys.timezone() # Will Display Time zone of your zone
+
+# Information about the datasets
+df_info(crime)
+```
+Gather some basic Information about the datasets before exploration. 
+The datasets is 78.5 Mb with 349080 Rows/observation and 17  different Columns. One thing you will observe is most of the Missing data are coming from Reporting area, latitude and longitude. 
+
+Lets further explore only missing datas in table format. So when we sort them in descending order we can see Reporting area has 22236 missing values and lat and long has 21842 missing values as of today 12/21/18.
+
+One of the false analysis is saying 99.59% of datasets is missing in Shooting Column. Upon diagnosis we found out if shooting didn't take place the row was left empty and if it took place it was coded as "Y". I also note that there are 12 districts in Boston datasets but if we see district it shows 13 unique values. There is something more than 12 district. Below it shows there is no missing data from District.
+
+
+## Missing Data Analysis  {.tabset .tabset-fade .tabset-pills}
+
+**Project Boundaries** 
+```{r}
+# Handling the Missing datasets
+sort(sapply(crime, function(x) sum(is.na(x))), decreasing = TRUE)
+
+# Sometimes we need to be carefull when package ask us to remove the missing data.
+plot_missing(crime)
+
+# Clean the column names.
+crime <- clean_names(crime)
+```
+If shooting hasn't occured then the row is left empty. Thats why it is showing 347664 Missing Varaibles in Shooting Column. There are about 1913 Missing district datasets. One of the idea to fix that would be use Latitude and Longitude data if avialable. But we have 21842 Lat Long missing data as well. Also we can give a try by using Reporting Area if its avialable. As the streets are not unique it will be Little harder to find the missing district based on Street Name.
+
+## Glimpse
+```{r}
+# Take a peek at our datasets
+glimpse(crime)
+```
+
+```{r}
+## Fixing Missing Data Lat and Long
+
+# latitude <- gsub('.*\\((.*),.*', '\\1', crime$location)
+# longitude <- gsub('.*, (.*)\\).*', '\\1', crime$location)
+# latitude <- as.factor(latitude)
+# longitude <- as.factor(longitude)
+
+# All the missing data has lat and long coordinates 0.000 & 0.000
+```
+
+** Factor conversion for better Summary Results**
+```{r}
+crime$incident_number <- as.factor(crime$incident_number)
+crime$offense_code_group <- as.factor(crime$offense_code_group)
+crime$offense_description <- as.factor(crime$offense_description)
+crime$district <- as.factor(crime$district)
+crime$shooting <- as.factor(crime$shooting)
+crime$occurred_on_date <- as.Date(crime$occurred_on_date)
+crime$day_of_week <- as.factor(crime$day_of_week)
+crime$ucr_part <- as.factor(crime$ucr_part)
+crime$street <- as.factor(crime$street)
+crime$location <- as.factor(crime$location)
+```
+
+## Incidents/Year
+
+Below is the number of Incidents Reported Each Year.
+
+```{r}
+crime %>%
+    filter(occurred_on_date < ymd("2018-12-21")) %>% 
+    group_by(occurred_on_date) %>%
+    summarise(n = n()) %>%
+    ggplot(aes(x = occurred_on_date, y = n)) +
+        geom_point() +
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+    labs(title = " Scatterplot Number of Incidents Reported in each year",
+      y = 'Number of Incidents Reported', 
+         x = 'Date')+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme_pankaj
+```
+
+One Interesting observation to see is crime reporting frequency has been evenly distributed. If you follow the dot it seems to drop towards the end and have pick up around mid year.
+
+## Plot 
+** plotting the crime datasets is helpful to see skewness of datasets.**
+
+```{r message = FALSE}
+# Nothing new or so specific to observe here. We have seen all these  data descriptvely. 
+plot_num(crime)
+```
+
+## Summary
+
+Below is the Summary of  Our Crime Datasets
+```{r}
+summary(crime)
+```
+
+## Describe
+
+```{r}
+describe(crime)
+# df_status(crime) # to see percenatage and quantile of each columns.
+```
+One thing to observe from above describe table is we cannot say crime has risen from 2015 because there were only observation from August compare to other years. For 2015 we start from August 15 missing almost 3/4 of data.For 2018 we are missing half a month of data. But its fair to say that the report of crime has stayed even in all these 4 years around 30% in each year.
+
+Looking at the month Column we can say that crime among all months remain constant except month of December where crimes are fairly low. My guess is it's cold and sometime it's snowy in Boston around December and also we have Christmas. People might be more busy towards holiday Parties, more family related things happening and also people are less crossing each others path. I cannot say its very low towards winter and high around summer as we need to break it down by year to make a call of the pattern which we might do it later.
+
+If we look at the day of the week column. It seems like Friday seems more arrest and Sunday seems less report of crime.
+
+UCR part three is major almost 50% observation followed by part two 30% and then 20 % part I.
+
+Something to Observe over here are the q_na which stands for quantity of NA. q_zeros : Quantity of Zeros in each column p_na which stands for percentage of NA and p_zeros which stands for percentage of Zeros. Apart from that we can see the unique values in each column. There are almost 222 different offense code for 67 different groups. We can witness 12 unique district for 4 year data. Interesting is 5 ucr_part as of data sets we should have only 3 ucr_part. What are other two? There are 4733 unique name of street. 
+
+
+Here we have another visualization of the number of incidents by district, this time we plot them in the order from least counts to most counts. As discussed before, Roxbury, Dorchester, and South End exhibits the most counts of crime between the years.
+
+
+**Lets see those missing district rows.**
+```{r}
+# Lets see number of observation in each district
+table(crime$district, useNA = "ifany") # useNA shows the Na
+# sum(table(crime$district)) # sum + Missing = total obs.
+
+missing_dist <- crime %>% filter(is.na(district))
+head(missing_dist$district, 5) # See NA in district 
+head(missing_dist, 2)
+```
+ 
+Where district is Missing we are also Missing Reporting area and only information we have in some is location which can be helpful to find.
+ 
+**Exploratory Data Analysis Boundaries**
+```{r}
+# Uncomment below to see details about missing district datasets.
+
+# table(missing_dist$reporting_area) # Too see how many repoting area is available to fix.
+# sum(table(missing_dist$reporting_area)) # getting the sum of reporting area.
+# table(missing_dist$shooting) # to see how many shooting happen in these datasets. Y:2
+# table(missing_dist$year) # to see which year has how many missing data.
+# table(missing_dist$month) # To see if the datasets is missing from particular month.
+# table(missing_dist$long) # To see how many unique longitude we have.
+# table(missing_dist$lat) # To see how many unique latitude we have.
+# table(missing_dist$day_of_week) # We have missing those district in each day of week.
+# table(missing_dist$hour) # Check the hour
+# table(missing_dist$offense_code_group) # chechking if crime was any help to figure out why these missing district.
+# sum(table(missing_dist$lat))
+# sum(table(missing_dist$long))
+```
+
+#**District Names** {.tabset .tabset-fade .tabset-pills}
+
+**Converting District Code to District Names**
+
+Just knowing the district codes is hard to know where the crime was reported in Boston. People do know the neighborhood name rather than District name so our first step will be to recode the district code to District name.
+
+```{r, message=FALSE}
+# Lets Rename the distrcit code to district name
+district_name = c(
+A1 = 'Downtown',
+A15= 'Charlestown',
+A7= 'East Boston',
+B2= 'Roxbury',
+B3= 'Mattapan',
+C6= 'South Boston',
+C11= 'Dorchester',
+D4= 'South End',
+D14= 'Brighton',
+E5= 'West Roxbury',
+E13= 'Jamaica Plain',
+E18= 'Hyde Park')
+
+district_name
+```
+
+We could clean up these missing datas in many ways. Some of the ideas are by using reporting area to figure out which district these missing district are coming from in total there are only 40 columns with reporting. Latitude and Longitude position will be helpful to fix these missing districts.  We have almost 1593 observations. It will be tedious work to chek each rows to fix and geolocation doesnt range by district as the district are not rectangle or square. There could be some efficient way to do these but will deal with these later.
+
+For now my plan is to ignore these 1909 which is 0.0054% which shouldnt have any affect on our datasets. While shooting it might fluctuate so I check that variable and found out there were 2 case where district is missing. I can fix by reporting area too. Most of the missing data are from 2018, almost 708, it could be still uploading as of today. I even break it down by month to see if certain month have whole missing data for district. But it was spread evenly between months as well. 
+
+Lets Move on and concentrate on bigger pie of data rather than focusing on small missing datasets.
+
+
+Lets ignore that missing district. 
+
+```{r}
+# We will change all district code to district name by passing the following code.
+crime$district <- as.factor(district_name[(crime$district)] )
+#unique(crime$district)
+sort(table(crime$district), decreasing = TRUE)
+# sum(table(crime$district))  # 346594 + 1915 = 348509 observation
+```
+
+From the summary Column we can say that Motor Vehicle Accident Response was recorded most and Larceny the second most.There were 1416 Shooting cases as of today.
+Most of the crimes happens on Friday followed by Monday and Saturday. 
+UCR (Uniform Crime Reporting )  part Three is mostly reported followed by Part II and then I.
+Most of the crime reported street is Washignton street,followed by Blue Hill Ave and then Boylston st. Also  there are 4 different Washington street in Boston, MA. As of now I don't have actual length of street so its hard to normalise the data based on crime and length. 
+
+
+#**Duplicate Datasets** {.tabset .tabset-fade .tabset-pills}
+
+## Time point
+```{r}
+# Looking duplicate data by incident_number, year, day_of_week : TIME POINT
+get_dupes(crime, incident_number, year) %>% nrow
+duplicated <- get_dupes(crime, incident_number, year, day_of_week)
+head(duplicated)
+```
+As of today  we have 71300 observation with same Incident Number with different crimes happened on same day. Only difference is the crimes that were committed have different offense code.
+
+## Location Count 
+```{r}
+# Looking duplicate data by incident_number, year, street, district : LOCATION 
+duplicate_count <- get_dupes(crime, incident_number, year, street, district, day_of_week)
+head(duplicate_count)
+```
+
+## Day of week
+**Lets see which day most of those multiple offense crime occurs.**
+```{r}
+tabyl(duplicate_count$day_of_week)
+sort(table(duplicate_count$day_of_week), decreasing = TRUE)
+```
+
+Again Friday comes on top of the list followed by Thrusday and Wednesday.Remember these are all in duplicated datasets which is different from orginal Crime datasets. Most of the multiple offense crime happened on Friday followed by Thrusday and then Wednesday. 
+
+## Offense code 
+```{r}
+head(sort(table(duplicate_count$offense_code_group),decreasing = TRUE), 10)
+```
+In our observation we see top ten contenders are drug Violation, followed by Warrant Arrests, Simple Assault. Remember these are all in duplicated datasets which is different from orginal Crime datasets.
+
+## Dupe count
+```{r}
+#sort(table(duplicate_count$dupe_count),decreasing = TRUE)
+tabyl(duplicate_count$dupe_count)
+```
+Most of the duplicated crimes happened at the same location are mostly charged with two violation code followed all the way upto 20 different offense. In past 4 years there is 1 such case. Similarly 4 cases where someone is charged with 12 different offense code.  I am really interested in finding out which was that one case where someone is charged with 20 different crimes offense. 
+
+## Dupe count Twenty
+```{r}
+duplicate_count[which(duplicate_count$dupe_count == 20), ] 
+```
+After digging dive in I think there should be 4 people involved. As we see there are 4 repeataed different offense code. I don't think one person could be chargedd with 4 different offense. So this happen in 2015. Lets pull out the whole history about it.
+
+## Incident ID
+
+For these we can take row name from original crime datasets.
+```{r}
+crime[which(crime$incident_number == "I152071596"), ] 
+```
+
+As we get guessed it happen in same location which can be confirmed by location address. Also by looking the offense code description seems like there was shooting involved from shooting column and also there were some death happened as we can see Murder and Manslaughter on offense code.
+
+## Ballastic District
+
+Offense_code "2662" is ballastic. Lets see what we can get from there.Lets Analysed by District first.
+
+```{r}
+ballastic <- crime[which(crime$offense_code == "2662"), ]
+ballastic %>% group_by(district) %>% 
+  count(sort = TRUE)
+```
+
+## Ballastic Year.
+
+Lets Analysed by Year 
+```{r}
+ballastic <- crime[which(crime$offense_code == "2662"), ]
+ballastic %>% group_by(year) %>% 
+  count()
+```
+Compare to 2016 and 2017 we have less crime involving ballastics.
+
+## Ballastic District & Year 
+
+But has shooting changed over course of year in each district.
+```{r}
+group_shoot_year <- crime[which(crime$shooting == "Y"), ]
+group_shoot_year %>% 
+  group_by(district, year) %>% 
+  count()
+```
+
+Overall the shooting has decreased compare to last year in each district. It has gone down.Lets see below the percentage of the duplicated count based on incident number percentage.
+
+## Ballastic by street.
+```{r}
+head( sort(table(duplicate_count$street),decreasing = TRUE), 10)
+```
+When the repeated crimes are occured in same location. It seems like Washington street still has multiple offense but there are more multiple offense on Boylston street than blue hill avenue which is slightly different from our datasets.Others remain the same.
+
+#**Variables** {.tabset .tabset-fade .tabset-pills}
+
+## UCR Part
+Lets see why there are 5 different observation of ucr_part?
+```{r}
+tabyl(crime$ucr_part)
+```
+So we see 98 observation of empty rows which  are not coded as NA or Zeros. and 1366 are coded as other. Thats why in describe it didnt show up as Missing or NA.
+
+
+## District
+
+```{r}
+ggplot(subset(crime,!is.na(district)))+
+  aes(x=district)+
+  geom_bar(stat = "count",fill='red') + 
+  geom_text(stat="count",aes(label=..count..),vjust=-1)+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  labs(title="Frequency of Incidents by Disctrict",
+       x="Districts",
+       y="Number of Incidents")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+scale_y_continuous(limit=c(0,60000))+
+  theme_pankaj
+
+# Dot plot 
+crime_dist <- crime %>% 
+  filter() %>% 
+  group_by(district) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  arrange(desc(n))
+
+# Frequency of crime by district wise:
+ggplot(crime_dist, aes(x = reorder(district, n), y = n)) + 
+  geom_point(size = 12, stat = "identity", color = "red") + 
+  geom_text(aes(label = n, fontface = "bold"), color = "black", size = 2) + 
+  theme_minimal(base_size = 20) + 
+  xlab("District") + ylab("Count") + 
+  ggtitle("Frequency of crime district wise") +
+  scale_y_continuous(limits=c(0,max(crime_dist$n+2000)))+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  theme_pankaj+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Save the dotplot as a png file
+ggsave("dotplot.png", scale = 2, dpi = 400)
+
+# Plotly
+plot_district = plot_ly(crime, x = ~ district, color = ~ district) %>% 
+  add_histogram() %>%
+  layout(
+    title = "Total district count by the crime",
+    xaxis = list(title = "district count",
+    yaxis = list(title = "Count"))
+  )
+plot_district
+
+xyplot(lat~long|district, data=crime, xlim=c(-71.2,-70.95), ylim=c(42.22,42.4))
+
+# Frequency of crime by district (in descending order)
+count(crime, district, sort = TRUE)
+```
+
+## Date and Time {.tabset .tabset-fade .tabset-pills}
+
+Lets dig into our crime datasets as we have some sort of idea how the duplicate incidents number has behaved. Lets have uniform date by fixing time Zone.
+
+```{r }
+# Detected data with Daylight Saving Time, converting to UTC/GMT
+crime$date <- as.POSIXlt(crime$occurred_on_date, "GMT") # Fixing time zone
+crime$date <- as.Date(crime$date) # Date 
+
+# Lets also create a seperate Year, month , day column for EDA.
+
+crime <- crime %>% mutate(crime_date = as.Date(occurred_on_date, "%Y-%m-%d")) 
+# create a sepearte ymd crime_date then we will divide that crime_date into year,month, day.
+crime <-crime %>% mutate(month=as.numeric(month(occurred_on_date)))
+crime <- crime %>% mutate(year=as.numeric(year(occurred_on_date)))
+crime <- crime %>% mutate(day=as.numeric(day(occurred_on_date)))
+
+# Lets look our datasets by date column.
+head(crime$occurred_on_date)
+```
+
+
+## Time Series pattern
+```{r}
+crime %>% 
+  count(date) %>% 
+  ggplot(aes(date, n))+
+  geom_line()+ # line graph for date.
+  expand_limits(y = 0)+ # less misleading
+  labs(title ="Continous Crime Date Pattern", color = "red")+
+  labs(caption = "Source: Boston Data | @ Pankaj Shah")+
+  theme(plot.title = element_text(color="#D70026", size=14, face="bold.italic", hjust = 0.5, vjust=0.5))+
+  theme_pankaj
+```
+
+As we can see the datasets that we extracted have continous recording without any breaks.Crime seems like pickup during the summer month and fall back in Winter. The pattern remains the same. Also we can see at the end of the year .i.e month of december have deep in crime rate. Living in Boston for a while one thing I have notice that December is coldest month, not one of the coldest but definetly the temperature remains high around 30-35F during the day and gets colder at night dropping down to 20-25F at night. Also Most of the schools have finals around this time of the year and most of the people live the town right after the final before the Christmas break. So it does explain the fall of crime around month of december. Also most of the people are busy either in Shopping Mall or with their family members for Christmas.
+
+## Incident by District
+
+**Frequency of Incidents by Disctrict** 
+```{r}
+ggplot(subset(crime,!is.na(district)))+
+  aes(x=year, color=district)+
+  geom_line(stat="count")+
+  scale_x_continuous(breaks = seq(2012,2018,1))+
+  scale_y_continuous(breaks = seq(5000,50000,5000))+
+  labs(title="Frequency of Incidents by Disctrict", x="Districts", y="Number of Incidents")+
+  labs(caption = "Source: Boston Data | @ Pankaj Shah")+
+  theme_pankaj
+```
+
+Cumulative Frequency of Incidents by District from 2015 to 2018.
+There seems to be a not any significant increase in number of crimes from 2016 upto 2018. The rise in line graph could be misleading interms of missing half a year of data in 2015.But from these graph we can see  there are less crime in different district. We can analyse or rank the district based on the crime occured based on these graph.
+
+
+#**Offense code distribution** {.tabset .tabset-fade .tabset-pills}
+```{r, message=FALSE}
+crime%>% 
+  count(offense_code, sort = TRUE) %>% 
+  ggplot(aes (n))+
+  geom_histogram()+
+  labs(title="Majority of crimes offense code lies below 5000", x="offense_code", y="n")+
+  labs(caption = "Source: Boston Data | @ Pankaj Shah")+
+  theme_pankaj
+```
+
+The majority of the offense code lies below 5000. 
+
+## Table
+```{r}
+#table(crime$offense_code_group)
+offense_code_crime <- sort(xtabs(formula = ~ offense_code_group, data = crime), decreasing = TRUE)
+head(offense_code_crime)
+offense_code_crime <- as.tibble(offense_code_crime)
+top_offense_code_crime <- offense_code_crime %>% top_n(10)
+top_offense_code_crime
+```
+
+
+## Top ten code
+
+```{r}
+crime_offense_code <- sort(table(crime$offense_code), decreasing = TRUE)
+top_10_offense_code_crime <- as.tibble(head(crime_offense_code, 10))
+top_10_offense_code_crime
+```
+
+## Top ten by district
+```{r}
+crime %>% 
+  filter(offense_code %in% top_10_offense_code_crime$Var1) %>%
+  group_by(district) %>% 
+  count
+```
+
+
+Most of the arrest was made for offense code 3006. Lets see what is that.
+
+## Medical assistance 
+
+```{r}
+crime[which(crime$offense_code == "3006"), ] %>% head(1)
+```
+It seems like most of the calls were made for Medical Assistance Sick/Injured Medical 
+
+## Medical assistance by district
+
+```{r}
+medical_assiscatance <- crime[which(crime$offense_code == "3006"), ]
+sort(table(medical_assiscatance$district), decreasing = TRUE)
+```
+
+## Medical assistance by street
+
+```{r}
+top_10_street <- sort(table(medical_assiscatance$street), decreasing = TRUE)
+head(top_10_street, 10)
+```
+
+## Investigate Person by street
+
+```{r}
+crime[which(crime$offense_code == "3115"), ] %>% head(1)
+```
+
+## Investigate Person by district
+
+```{r}
+investigate_person <- crime[which(crime$offense_code == "3115"), ]
+sort(table(investigate_person$district), decreasing = TRUE)
+head(sort(table(investigate_person$street), decreasing = TRUE),10)
+```
+
+## Shooting while Investigate
+
+**Did shooting took place while investigating person?**
+
+```{r}
+sort(table(investigate_person$shooting), decreasing = TRUE)
+```
+There are 12 incidents out of 20236 Where shooting was involved while investigating the person.
+
+## Shooting district
+
+**In which district did the shooting took place while investigating person?**
+
+```{r}
+investigate_shooting <- investigate_person %>% 
+   filter(shooting == "Y")
+
+sort(table(investigate_shooting$district), decreasing = TRUE)
+```
+
+## Shooting Reporting Area
+
+**In which reporting area did the shooting took place while investigating person?**
+```{r}
+sort(table(investigate_shooting$reporting_area), decreasing = TRUE)
+```
+
+> 330, 326, 909 : Mattapan |
+> 26 : Roxbury |
+> 906, 912 :Jamaica Plain  |
+> 441 : South Boston |
+
+## Other components
+
+**Various other components to look at while the shooting took place when investigating person**
+```{r}
+sort(table(investigate_shooting$day_of_week), decreasing = TRUE)
+sort(table(investigate_shooting$month), decreasing = TRUE)
+sort(table(investigate_shooting$year), decreasing = TRUE)
+head(sort(table(investigate_shooting$street), decreasing = TRUE),8)
+sort(table(investigate_shooting$hour), decreasing = TRUE)
+```
+
+It is remarkable to see that shooting has been increased while investigating in 2018 we have 8 incidents compare to 2016, 2017.
+4 shooting happen around 6pm while investigating.
+
+#**Offense category** {.tabset .tabset-fade .tabset-pills}
+```{r}
+crime$offense_category <- crime$offense_code_group
+```
+
+## Motor
+```{r}
+unique(crime$offense_code_group[grep("Motor",crime$offense_code_group)])
+```
+## Larceny
+```{r}
+unique(crime$offense_code_group[grep("Larceny",crime$offense_code_group)])
+```
+
+**Offense grouping**
+
+```{r}
+crime<- crime %>%
+  mutate(offense_category = ifelse(offense_code_group %in% c("Fire Related Reports", "Firearm Discovery", "Arson"),"Arson", 
+                  ifelse(offense_code_group %in% c("Simple Assault", "Verbal Disputes", "Disorderly Conduct", "Aggravated Assault", "Prisoner Related Incidents"),"Assault",
+                  ifelse(offense_code_group %in% c("Other Burglary", "Residential Burglary", "Commercial Burglary", "Burglary - No Property Taken"),"Burglary",
+                  ifelse(offense_code_group %in% c("Medical Assistance", "Biological Threat"),"Medical",
+                  ifelse(offense_code_group %in% c("Larceny", "Larceny From Motor Vehicle", "Auto Theft", "Auto Theft Recovery", "HOME INVASION", "Embezzlement"),"Larceny",
+                  ifelse(offense_code_group %in% c("Missing Person Reported", "Missing Person Located"),"Missing", 
+                  ifelse(offense_code_group %in% c("Motor Vehicle Accident Response", "Towed", "License Plate Related Incidents"),"MVT", 
+                  ifelse(offense_code_group %in% c("Investigate Person", "INVESTIGATE PERSON","Investigate Property","Drug Violation","Violations","Counterfeiting","Operating Under the Influence","Firearm Violations","License Violation","Restraining Order Violations","Liquor Violation","Assembly or Gathering Violations","Confidence Games","Harbor Related Incidents","Evading Fare","Gambling"),"NON-VIO",
+                  ifelse(offense_code_group %in% c("Property Lost","Property Found","Recovered Stolen Property","Property Related Damage","Landlord/Tenant Disputes"),"Property",
+                  ifelse(offense_code_group %in% c("Robbery"),"Robbery", 
+                  ifelse(offense_code_group %in% c("Harassment", "Criminal Harassment", "Prostitution"),"SEX", 
+                  ifelse(offense_code_group %in% c("HUMAN TRAFFICKING", "HUMAN TRAFFICKING - INVOLUNTARY SERVITUDE"), "TRAFFICKING",
+                  ifelse(offense_code_group %in% c("Vandalism"),"Vandalism", 
+                  ifelse(offense_code_group %in% c("Warrant Arrests", "Search Warrants"),"Warrant", 
+                  ifelse(offense_code_group %in% c("Police Service Incidents","Ballistics","Bomb Hoax","Offenses Against Child / Family","Homicide","Explosives","Manslaughter"),"VIO",
+                  ifelse(offense_code_group %in% c("Fraud"),"Fraud", 
+                  ifelse(offense_code_group %in% c("Phone Call Complaints", "Service", "Aircraft"),"Service+_callls",
+                                                                    "Other"))))))))))))))))))
+```
+
+## Percentage
+```{r}
+table(crime$offense_category)
+
+# Frequency and percent of crime category (in descending order)
+count(crime, offense_category, sort = TRUE) %>%
+  mutate(percent = round(n/sum(n)*100, 1))
+```
+
+##  Count
+```{r}
+
+# Mean frequency of crime category per district
+crime %>%
+  group_by(offense_category,district) %>%
+  summarise(total = n()) %>% 
+  group_by(offense_category) %>% 
+  summarise(average = round(mean(total, na.rm=TRUE), 0))
+
+# Count by district
+# Frequency of crime category by district (in descending order)
+crime %>%
+  group_by(offense_category, district) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  arrange(desc(n))
+```
+
+## Count by Month
+```{r}
+crime %>% 
+  count(offense_category, month = floor_date(date, "month")) %>% 
+  filter(month > min(month)) %>% 
+  filter(month < max(month)) %>% 
+  ggplot(aes(month, n , color = offense_category))+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  geom_line()+
+  labs(title = "Offense Category by Month")+
+  theme_pankaj
+```
+
+We used crime classification from the Book of Criminal Justice and plotted the number of incidents in each type of crime. It helps to visualize the types of crime by classifying them into broader cattegories; e.g. instead of having many types of larceny, it helps to only visualize all types of larceny as one category.
+
+## Plot  Crime
+```{r error = FALSE}
+plot_crime_offense_category = plot_ly(crime, x = ~ offense_category, color = ~ offense_category) %>% 
+  add_histogram() %>%
+  layout(
+    title = "Total Offense category count by the crime",
+    xaxis = list(title = "Offense category",
+    yaxis = list(title = "Count"))
+  )
+plot_crime_offense_category
+```
+## Larceny
+```{r}
+
+# Frequency and percent of Vehicle crime by district (in descending order)
+crime %>% 
+  filter(offense_category == "Larceny") %>% 
+  group_by(district) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  arrange(desc(n)) %>%
+  mutate(percent = round(n/sum(n)*100, 1))
+
+df <- crime %>%
+  filter(offense_category == "Larceny") %>%
+  group_by(district) %>%
+  summarise(n = n())
+
+calendar_heatmap <- ggplot(df, aes(x= reorder(district, -n), y=n, fill=n)) +
+  geom_tile(aes(fill=n)) +
+  geom_text(aes(label=n), size=3.5, color="black") +
+  scale_fill_gradient("Frequency", low = "darkgreen", high = "red") +
+  theme_pankaj+ 
+  labs(x = "District")+
+  ggtitle("Larceny levels in Boston") +
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+calendar_heatmap
+#ggsave("calendar_heatmap.png", scale = 1, dpi = 300)
+```
+
+## Larceny Arrest 
+```{r}
+MA_Arrest_Summary <-crime %>%
+    filter(offense_category == 'Larceny') %>%
+    group_by(month, district, year) %>%
+    summarise(Count = n())
+
+MA_Arrest_Summary %>% head(5)
+
+ggplot(MA_Arrest_Summary, aes(x= district, y= Count, fill = year)) +
+  geom_point()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme_pankaj 
+
+# 80:20
+
+tbl <- crime %>% 
+  filter(offense_category == "Larceny") %>% 
+  group_by(district) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  arrange(desc(n)) %>%
+  mutate(percent.crimes = round(n/sum(n)*100, 1),
+         cum.percent.crimes = round(cumsum(percent.crimes), 1),
+         percent.district = 1/n()*100,
+         cum.percent.district = round(cumsum(percent.district), 1)) %>% 
+          select(DISTRICT = district,
+         `No. crimes` = n,
+         `% crimes` = percent.crimes,
+         `Cum. % crimes` = cum.percent.crimes,
+         `Cum. % district` = cum.percent.district)
+
+# Create a simple table and save as a pdf
+pdf("80-20_rule.pdf", height=11, width=8.5)
+grid.table(tbl, rows = NULL)
+dev.off()
+```
+
+Larceny Proportion in December 2015 and December 2017
+We take a closer look at larceny as a proportion of total robbery offences, by district, in December 2015. Since December is coming up, and it is a holiday month, we wanted to see the spread of larceny across districts. It is interesting to see that more larceny occurs in the South End and and Roxbury than any other district, but this is in line with our observation that a lot more crime occurs in these districts than any other.
+
+However, what is more interesting is seeing the change in distrct level larceny between 2015 and 2017. Larceny counts increased in the South End from 2015 to 2017, whereas the larceny counts decreased significantly in Roxbury. 
+
+
+## Larceny District
+```{r}
+# Recoding 1 & 0 for shooting as there are less shooting in crime involved.
+crime$shooting <- ifelse(as.character(crime$shooting) == "Y", 1, 0)
+table(crime$shooting == 1)
+
+MA_Arrest_Summary <-crime %>%
+    filter(offense_category == 'Larceny') %>%
+    group_by(month, district, year) %>%
+    summarise(Count = n()
+              )
+MA_Arrest_Summary %>% head(5)
+```
+
+## Larceny Shooting
+```{r}
+# Summarize the arrests
+MA_Arrest_Summary <-crime %>%
+    filter(offense_category == 'Larceny' |  shooting == "Y") %>%
+    group_by(month, district, year) %>%
+    summarise(Count = n())
+              
+MA_Arrest_Summary %>% head(5)
+
+ggplot(MA_Arrest_Summary, aes(x= district, y= Count, fill = year)) +
+  geom_point()+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme_pankaj 
+```
+
+## Comparison Year
+
+```{r}
+# Frequency of crime by district (in descending order)
+par(mfrow=c(2,2))
+df_3 <- crime %>% 
+  filter(date == "2015-12-01" & offense_category == "Larceny") %>% 
+  count(district, sort = TRUE) %>%
+  mutate(percent = round(n/sum(n)*100, 1)) %>% 
+  select(district, percent) %>% 
+  spread(district, percent)
+df_3 <- df_3[ , order(-df_3 [which(rownames(df) == '1'), ]) ]
+
+# Use waffle
+waffle(df_3, rows = 4, size = 2, 
+       colors=(RColorBrewer::brewer.pal(n=10,"Set3")),
+       title="District level Larceny as a proportion of \n total Robbery  offences on year December 2015",
+       legend_pos = "right")+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")
+# ggsave("waffle.png", scale=1.5, dpi=300)
+# Frequency of crime by district (in descending order)
+df_3 <- crime %>% 
+  filter(date == "2018-12-01" & offense_category == "Larceny") %>% 
+  count(district, sort = TRUE) %>%
+  mutate(percent = round(n/sum(n)*100, 1)) %>% 
+  select(district, percent) %>% 
+  spread(district, percent)
+df_3 <- df_3[ , order(-df_3 [which(rownames(df) == '1'), ]) ]
+
+# Use waffle
+waffle(df_3, rows = 4, size = 2, 
+       colors=(RColorBrewer::brewer.pal(n=12,"Set3")),
+       title="District level Larceny as a proportion of \n total Robbery offences on year December 2018",
+       legend_pos = "right")+labs(caption= "Data Source : Boston |@ Pankaj Shah")
+# ggsave("waffle_1.png", scale=1.5, dpi=300)
+```
+
+#**Shooting**{.tabset .tabset-fade .tabset-pills}
+
+```{r}
+shoot <- crime[which(crime$shooting == 1), ]
+sort(table(shoot$district), decreasing = TRUE)
+sort(table(shoot$year), decreasing = TRUE)
+m1 <- data.frame(sort(table(shoot$month), decreasing = TRUE))
+m1 <- m1 %>% rename(month = Var1)
+m1
+d1 <- data.frame(table(shoot$day_of_week))
+d1 <- d1 %>% rename(wday = Var1)
+d1
+p1 <- data.frame(sort(table(shoot$day), decreasing = TRUE))
+p1 <- p1 %>% rename(day = Var1)
+
+# Overall Shooting throughout the year
+ggplot(data = shoot, aes(x = month)) +
+  geom_bar(label = TRUE)+
+  ggtitle("Overall Shooting throughout the year")+
+  labs(caption = "Source: Boston Datasets | @ Pankaj Shah", x = "Month") +
+  theme_pankaj
+
+# Overall Shooting throughout the month
+ggplot(data = shoot, aes(x = day)) +
+  geom_bar()+
+  ggtitle("Overall Shooting throughout the month ")+
+  labs(caption = "Source: Boston Datasets | @ Pankaj Shah", x = "Day")+
+  theme_pankaj
+
+# Overall Shooting throughout the week 
+
+ggplot(data = d1, aes(x = wday, Freq)) +
+  geom_bar(stat = "identity")+
+  ggtitle("Overall Shooting throughout the week ") +
+  labs(caption = "Source: Boston Datasets | @ Pankaj Shah", x = "Wday") +
+  theme_pankaj
+
+p <- ggplot(d1, aes(x = wday, y = Freq, fill = Freq)) + 
+       geom_bar(width = 1, stat="identity") + coord_polar("y", start=pi / 3) + 
+       ggtitle("Pie Chart distribution of shooting throughout the week") +
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")
+print(p) 
+
+```
+
+#**Reporting Area** {.tabset .tabset-fade .tabset-pills}
+```{r}
+plot(prop.table(table(crime$reporting_area)))
+```
+
+We can see which regions have most of the crimes.
+
+#**Crime Shift breakdown**{.tabset .tabset-fade .tabset-pills}
+
+Lets divide day in 4 shifts to know the crime time. We generate six points of the day to bin the day into four equal segments.
+
+##**Shift Count**
+```{r}
+
+time_diff <- c("0", "6", "12", "18", "24") # Breaking day into 6 interval period
+crime$time_diff <- cut(crime$hour, 
+                      breaks = time_diff,
+                      labels = c("00-06", "06-12", "12-18", "18-24"), 
+                      include.lowest = TRUE)
+table(crime$time_diff)
+
+#createing Shift plot
+crime <- crime %>% mutate(shift = ifelse(time_diff == "00-06", "Late Night",
+                                                     ifelse(time_diff == "06-12", "Morning",
+                                                             ifelse(time_diff == "12-18", "Day",
+                                                                    "Evening"))))
+table(crime$shift)
+#
+plot_shift = plot_ly(crime, x = ~ time_diff, color = ~ time_diff) %>% 
+  add_histogram() %>%
+  layout(
+    title = "Total district count by the crime",
+    xaxis = list(title = "Shift count",
+    yaxis = list(title = "Count"))
+  )
+plot_shift
+
+temp <- aggregate(crime$offense_category, 
+                  by = list(crime$offense_category, crime$time_diff), FUN= length)
+names(temp) <- c("offense_category", "time_diff", "count")
+head(temp)
+```
+
+Crime by Time Range of Day: It seems like most of the crime is committed between 6am and 6pm. Most incidents happen between 12pm and 6pm, while the least happens between 12am and 6am.
+
+#**Holiday** {.tabset .tabset-fade .tabset-pills}
+
+Lets look at the holiday data from 2015 till today
+```{r}
+holiday <- crime %>% filter(crime_date == "2015-01-01"| # New Year 2015
+                              crime_date == "2015-01-19"| # Martin Luther King, Jr.
+                              crime_date == "2015-02-16"| # Washington’s Birthday
+                              crime_date == "2015-05-25"| # Memorial Day
+                              crime_date == "2015-07-04"| # Independence Day
+                              crime_date == "2015-09-07"| # Labor Day
+                              crime_date == "2015-10-12"| # Columbus Day
+                              crime_date == "2015-11-11"| # Veterans Day
+                              crime_date == "2015-11-26"| # Thanksgiving Day
+                              crime_date == "2015-12-25"| # Christmas Day
+                              crime_date == "2016-01-01"| # New Year 2016
+                              crime_date == "2016-01-18"| # Martin Luther King, Jr.
+                              crime_date == "2016-02-15"| # Washington’s Birthday
+                              crime_date == "2016-05-30"| # Memorial Day
+                              crime_date == "2016-07-04"| # Independence Day
+                              crime_date == "2016-09-05"| # Labor Day
+                              crime_date == "2016-10-10"| # Columbus Day
+                              crime_date == "2016-11-11"| # Veterans Day
+                              crime_date == "2016-11-24"| # Thanksgiving Day
+                              crime_date == "2016-12-25"| # Christmas Day
+                              crime_date == "2017-01-01"| # New Year 2017
+                              crime_date == "2017-01-16"| # Martin Luther King, Jr.
+                              crime_date == "2017-02-20"| # Washington’s Birthday
+                              crime_date == "2017-05-29"| # Memorial Day
+                              crime_date == "2017-07-04"| # Independence Day
+                              crime_date == "2017-09-04"| # Labor Day
+                              crime_date == "2017-10-09"| # Columbus Day
+                              crime_date == "2017-11-10"| # Veterans Day
+                              crime_date == "2017-11-23"| # Thanksgiving Day
+                              crime_date == "2017-12-25"| # Christmas Day
+                              crime_date == "2018-01-01"| # New Year 2018
+                              crime_date == "2018-01-15"| # Martin Luther King, Jr.
+                              crime_date == "2018-02-19"| # Washington’s Birthday
+                              crime_date == "2018-05-28"| # Memorial Day
+                              crime_date == "2018-07-04"| # Independence Day
+                              crime_date == "2018-09-03"| # Labor Day
+                              crime_date == "2018-10-08"| # Columbus Day
+                              crime_date == "2018-11-12"| # Veterans Day
+                              crime_date == "2018-11-22") # Thanksgiving Day 
+                              # No data for christmas 2018.
+```
+
+## Holiday EDA
+```{r}
+count_holiday <- holiday %>% group_by(crime_date,offense_category) %>% summarise(count = n())
+count_holiday_total <- holiday %>% group_by(crime_date) %>% summarise(count = n())
+count_holiday_year <- holiday %>% group_by(year) %>% summarise(count = n())
+count_crime <- crime %>% group_by(year,offense_category) %>% summarise(count = n())
+count_shift <- crime %>%  group_by(year,shift) %>% summarise(count = n())
+count_shift$count <- as.numeric(count_shift$count)
+count_crime$count <- as.numeric(count_crime$count)
+count_district <- crime %>% group_by(year,district) %>% summarise(count = n())
+choice <- unique(count_crime$offense_category)
+total_crime <- crime %>% group_by(year) %>% summarise(total = n())
+total_crime$count <- as.numeric(total_crime$total)
+```
+
+#**Crime Breakdown by timepoint** {.tabset .tabset-fade .tabset-pills}
+
+## Day of the Week
+
+There seems to be higher counts of crime on Fridays than the rest of the week, with Sunday having the lowest counts of crime. More crime also occur during the weekdays rather than on the weekend. Notice here that the y-axis scale starts from 43,000 and ends with 52,500.
+```{r}
+crime$day <- crime$DAY_OF_WEEK
+crime$day <- factor(crime$day, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+
+qplot(crime$day, xlab= "Day of week", main= "Crimes by day of week") + scale_y_continuous("Number of crimes")+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  theme_pankaj
+
+```
+
+## District count 
+```{r}
+plot_crime_offense_day = plot_ly(crime, x = ~day , color = ~ day) %>% 
+  add_histogram() %>%
+  layout(
+    title = "Total district count by the crime during the day",
+    xaxis = list(title = "Days",
+    yaxis = list(title = "Count"))
+  )
+plot_crime_offense_day
+```
+
+## Crime by Month
+Most crimes happen on the later half of the year, and the most crime-ridden quarter is the third quarter of the year.
+
+```{r}
+crime$Month <- month.abb[crime$month]
+table(crime$Month)
+
+crime$Month <- factor(crime$Month, levels= c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+ggplot(crime, aes(x= Month))+
+  geom_bar()+
+  theme_pankaj+
+  ggtitle("Crimes by Month")+
+  labs(y ="Number of crimes")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  labs(caption = "Boston Data Source | @ Pankaj Shah")
+```
+
+
+## Time of Day
+
+**Gradient Tile Plot of Crime Types by Time of Day**
+This is a more detailed view of the types of crimes (by intensity) throughout the day segmented by 6 hour sections. 
+
+```{r}
+ggplot(temp, aes(x= offense_category, y= factor(time_diff))) +
+geom_tile(aes(fill= count)) + scale_x_discrete("offense_category", expand = c(0,0)) + scale_y_discrete("Time of day", expand = c(0,-2)) +
+scale_fill_gradient("Number of crimes", low = "white", high = "orange") + theme_bw() + ggtitle("Crimes by time of day") +
+theme(panel.grid.major = element_line(colour = NA), panel.grid.minor = element_line (colour = NA))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  theme_pankaj
+```
+
+Aside from there being more crime between 6am and 6pm, non-violent crimes have the highest intensity in terms of occurence, and happen between 12pm and 6pm. More motor-vehicle crimes occur between 6am and 12pm than any othe time range, and most larceny occurs between 12pm and 6pm.
+
+## Day of Week
+**Gradient Tile Plot of Crime Types by Day of Week**
+
+```{r}
+temp1 <- aggregate(crime$offense_category, by = list(crime$offense_category, crime$day), FUN= length)
+names(temp1) <- c("offense_category", "day", "count")
+
+ggplot(temp1, aes(x= offense_category, y= day, fill= count)) + geom_tile(aes(fill= count)) +
+scale_x_discrete("offense_category", expand = c(0,0)) + scale_y_discrete("Day of week", expand = c(0,-2)) + scale_fill_gradient("Number of crimes", low = "white", high = "lightpink") +
+ggtitle("Crimes by day of week") +
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  theme_pankaj +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+In our previous plot 'Crime by Day of Week', we saw that the occurence of crime is even distributed throughout the weekdays, and that crime happens less on weekends. Here, we are able to see the each type of crime committed, and its frequency in terms of intensity, throughout the week.
+
+Most crimes seem to be in line with what the previous graph told us, however, it seems that vandalism occurs more often on weekends than weekdays, as suggested by the deeper color on Saturday and Sunday than the rest of the week.
+
+## Types by Month
+
+**Gradient Tile Plot of Crime Types by Month**
+```{r}
+temp2 <- aggregate(crime$offense_category, by = list(crime$offense_category, crime$Month), FUN= length)
+names(temp2) <- c("offense_category", "Month", "count")
+
+ggplot(temp2, aes(x= offense_category, y= Month, fill= count)) +
+geom_tile(aes(fill= count)) +
+scale_x_discrete("OFFENSE_CAT", expand = c(0,0)) +
+scale_y_discrete("month", expand = c(0,-2)) +
+scale_fill_gradient("Number of crimes", low = "white", high = "lightgreen") + theme_bw() + 
+ggtitle("Crimes by Month") + 
+labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+theme_pankaj +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Previously, we see that crimes most often occur in the third quarter of the year, here we are able to see what types of crime are committed throughout the year by month.
+
+The majority of the types of crime are pretty evenly distributed, in terms of color intensity, throughout the year. For crimes such non-violent crime, motor vehicle theft, larceny, and assault, they are in line with our observation that crime occurs more in Q3 than other quarters.
+
+
+#**Crime rate by Seasons**{.tabset .tabset-fade .tabset-pills}
+Here we explore the possibility that seasonality affects the rate at which crime is committed per hour. However, it doesn't seem like there are any significant differences between seasons on the rate of crime occurence.
+```{r}
+#create seasons
+crime<- crime %>% mutate(Season = ifelse(month %in% c(6,7,8), "Summer",
+                                                     ifelse(month %in% c(9,10,11), "Fall",
+                                                             ifelse(month %in% c(12,1,2), "Winter",
+                                                                    "Spring"))))
+table(crime$Season)
+
+# Plot
+
+plot_crime_offense_season = plot_ly(crime, x = ~ Season, color = ~ Season) %>% 
+  add_histogram() %>%
+  layout(
+    title = "Total count of the crime by Season",
+    xaxis = list(title = "Season",
+    yaxis = list(title = "Count"))
+  )
+plot_crime_offense_season
+```
+
+#**Street Crimes** {.tabset .tabset-fade .tabset-pills}
+```{r}
+street_crime <- sort(table(crime$street), decreasing = TRUE)
+head(street_crime, 10)
+```
+
+## Most Dangerous Streets
+```{r message=FALSE, dev='png', dpi=300}
+library("RColorBrewer") 
+pal = brewer.pal(9,"Blues")
+street_name <- as.tibble(table(crime$street))
+colnames(street_name) <- c("Street_Name", "Count")
+wordcloud(street_name$Street_Name, street_name$Count, min.freq = 200, random.order = F, random.color = F, colors =c("black", "cornflowerblue", "darkred"), scale = c(2,.3))
+```
+
+This is a word cloud of the most dangerous streets in Boston. Washington St. appears the be the most dangerous street in Boston, however there are Wahsingston streets in multiple districts, so that is a limitation of this word cloud.
+
+## Streets | District
+**Most Dangerous Streets in Each District**
+Here you can see the top three most crime-ridden streets by district.
+
+```{r fig.width=25, fig.height=40, warning=FALSE, dev='png', dpi=300}
+streetd = data.frame(with(crime,table(street, district)))
+topstreet = data.frame()
+for (district_name in unique(streetd$district)) {
+  substreetd = subset(streetd, district==district_name)
+  tmp = substreetd[with(substreetd, order(Freq, decreasing=T))[1:3], ]
+  topstreet = rbind(topstreet, tmp)
+}
+
+topstreet$street = as.factor(topstreet$street)
+topstreet$Rank = rep(3:1, 6)
+library(ggplot2)
+ggplot(topstreet, aes(x= Rank, y = Freq, label=street, fill = Freq))+
+  geom_text(aes(label=street), size=3.0) +
+  ylim(0,10000)+
+geom_bar(stat='identity')+
+geom_text(size=9, hjust=0, vjust=0)+
+facet_wrap(~district, nrow=12)+
+  theme_bw(base_size=30)+
+  labs(caption= "Data Source : Boston |@ Pankaj Shah")+
+  coord_flip()
+
+```
+
+
+# Save and Read RDS{.tabset .tabset-fade .tabset-pills}
+```{r}
+
+# RENAME for R shiny App
+crime <- crime %>% rename(CRIME = offense_category, LONGITUDE = long, LATITUDE = lat)
+holiday <- holiday %>% rename( CRIME = offense_category,LONGITUDE = long, LATITUDE = lat)
+
+saveRDS(crime, file = "crime.rds")
+saveRDS(holiday, file = "holiday.rds")
+
+crime <- readRDS( "crime.rds")
+holiday <- readRDS("holiday.rds")
+```
+
+#**Conclusion**{.tabset .tabset-fade .tabset-pills}
+After performing in-depth analysis on the Boston Crime Data Set, we can clearly see the trends and relations between the types of crimes, location and the occurance of the crime. Some of the notable takeaways from the analysis are mentioned below:
+
+1. The most affected districts in Boston are Dorchester, South-End, Roxbury. 
+2. It can be noted that the highest number of the crimes were reported during summer months of July and Auguest. 
+3. Motor-Vehicle accident response were the highest number of report registered with the Boston Police. 
+
+This analysis can help Boston Police act accordingly and try to reduce the crimes frequently occuring in the city of Boston.
+
+Frequency of Incidents by District:
+Dorchester, Roxbury, and South End districts have the highest cumulative incidents across the dataset. These three districts are also neighbors with each other, spanning from the South to the Southeast of Boston.
+
+Link for R Shiny app for further exploration is here.
+
+https://cloudstudio.shinyapps.io/github/
+```{r}
+```
